@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Guide</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* General styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Header styles */
+    header {
+      background-color: #24292e;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 24px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Container styles */
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    /* Card styles */
+    .card {
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 0.3s ease;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .card-body {
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .card-body p {
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    .card-body a {
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .card-body a:hover {
+      color: #0056b3;
+    }
+
+    .card-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px 8px 0 0;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover .card-image {
+      transform: scale(1.05);
+    }
+
+    .expand-icon {
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .expand-icon:hover {
+      transform: rotate(180deg);
+    }
+
+    /* Message input styles */
+    .message-input {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .message-input input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .message-input input[type="text"]:focus {
+      border-color: #007bff;
+    }
+
+    .message-input button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .message-input button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    Travel Guide
+  </header>
+  <div class="container" id="chat-messages">
+    <!-- Messages will be dynamically added here -->
+  </div>
+  <div class="container message-input">
+    <input type="text" id="query-input" placeholder="Enter your query">
+    <button id="send-btn">Send</button>
+  </div>
+  <script>
+    // JavaScript code for frontend functionality
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatMessages = document.getElementById('chat-messages');
+      const queryInput = document.getElementById('query-input');
+      const sendBtn = document.getElementById('send-btn');
+
+      sendBtn.addEventListener('click', async () => {
+        const query = queryInput.value.trim();
+
+        if (query !== '') {
+          const response = await fetch('http://localhost:5000/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query })
+          });
+
+          if (response.ok) {
+            const results = await response.json();
+            displayMessages(results.data); // Display data array from results
+          } else {
+            console.error('Error:', response.statusText);
+          }
+        }
+      });
+
+      function displayMessages(messages) {
+        messages.forEach(message => {
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('card');
+
+          // Create HTML content for each message
+          const htmlContent = `
+            <div class="card-header">
+              <h3>${message.title}</h3>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="card-body">
+              <p>${message.description}</p>
+              <p><strong>Address:</strong> ${message.address}</p>
+              <p><strong>Categories:</strong> ${message.categories}</p>
+              <p><strong>Website:</strong> <a href="${message.website}" target="_blank">${message.website}</a></p>
+            </div>
+            <img class="card-image" src="${message.image}" alt="${message.title}">
+          `;
+
+          messageElement.innerHTML = htmlContent;
+          chatMessages.appendChild(messageElement);
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+      }
+    });
+  </script>
+</body>
+
+</html>
